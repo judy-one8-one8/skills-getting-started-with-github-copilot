@@ -51,9 +51,15 @@ document.addEventListener("DOMContentLoaded", () => {
         participantsListEl.className = "participants-list";
 
         if (details.participants.length > 0) {
-          details.participants.forEach((email) => {
+          details.participants.forEach((p) => {
+            // CHANGED: normalize participant value (handle string or object)
+            const emailText =
+              typeof p === "string"
+                ? p
+                : (p && (p.email || p.address || p.name)) || JSON.stringify(p);
+
             const li = document.createElement("li");
-            li.textContent = email;
+            li.textContent = emailText;
             participantsListEl.appendChild(li);
           });
         } else {
@@ -109,7 +115,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
               // Append new participant to list and update internal count
               const li = document.createElement("li");
-              li.textContent = email;
+              // CHANGED: normalize email in case server uses object structure
+              const emailText = typeof email === "string" ? email : (email && (email.email || email.address || email.name)) || String(email);
+              li.textContent = emailText;
               participantsListEl.appendChild(li);
               details.participants.push(email);
               spotsLeft = details.max_participants - details.participants.length;
@@ -197,7 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const participantsListEl = card.querySelector(".participants-list");
           if (participantsListEl) {
             const li = document.createElement("li");
-            li.textContent = email;
+            const emailText = typeof email === "string" ? email : (email && (email.email || email.address || email.name)) || String(email);
+            li.textContent = emailText;
             participantsListEl.appendChild(li);
           }
 
