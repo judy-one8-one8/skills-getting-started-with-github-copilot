@@ -147,10 +147,11 @@ footer {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px dashed #ddd;
+  margin-bottom: 15px;  /* Add space before the add form */
 }
 
 .participants-list {
-  list-style-type: disc;
+  list-style: disc inside;  /* Force bullet points to show */
   padding-left: 20px;
   margin-top: 8px;
 }
@@ -159,4 +160,10 @@ footer {
   padding: 3px 0;
   color: #666;
   font-size: 0.9em;
+  display: list-item !important;  /* Force list item display */
+}
+
+.empty-note {
+  font-style: italic;
+  color: #888;
 }

@@ -42,34 +42,21 @@ document.addEventListener("DOMContentLoaded", () => {
         // Participants section (always present)
         const participantsSection = document.createElement("div");
         participantsSection.className = "participants-section";
-
-        const participantsTitle = document.createElement("p");
-        participantsTitle.innerHTML = "<strong>Current Participants:</strong>";
-        participantsSection.appendChild(participantsTitle);
+        participantsSection.innerHTML = '<p><strong>Current Participants:</strong></p>';
 
         const participantsListEl = document.createElement("ul");
         participantsListEl.className = "participants-list";
-
-        if (details.participants.length > 0) {
-          details.participants.forEach((p) => {
-            // CHANGED: normalize participant value (handle string or object)
-            const emailText =
-              typeof p === "string"
-                ? p
-                : (p && (p.email || p.address || p.name)) || JSON.stringify(p);
-
+        
+        if (details.participants && details.participants.length > 0) {
+          details.participants.forEach(p => {
             const li = document.createElement("li");
-            li.textContent = emailText;
+            li.textContent = typeof p === "string" ? p : p.email || p.name || String(p);
             participantsListEl.appendChild(li);
           });
         } else {
-          const emptyNote = document.createElement("p");
-          emptyNote.className = "empty-note";
-          emptyNote.style.fontStyle = "italic";
-          emptyNote.textContent = "No participants yet - Be the first to join!";
-          participantsSection.appendChild(emptyNote);
+          participantsListEl.innerHTML = '<li class="empty-note">No participants yet - Be the first to join!</li>';
         }
-
+        
         participantsSection.appendChild(participantsListEl);
 
         // Inline add-participant form
@@ -110,8 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (res.ok) {
               // Remove empty-note if present
-              const emptyNote = participantsSection.querySelector(".empty-note");
-              if (emptyNote) emptyNote.remove();
+              const emptyNote = participantsListEl.querySelector('.empty-note');
+              if (emptyNote) {
+                participantsListEl.innerHTML = ''; // Clear "no participants" message
+              }
 
               // Append new participant to list and update internal count
               const li = document.createElement("li");
@@ -147,12 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // Assemble card
+        // Assemble card in specific order
         activityCard.appendChild(titleEl);
         activityCard.appendChild(descEl);
         activityCard.appendChild(scheduleEl);
         activityCard.appendChild(availabilityEl);
-        activityCard.appendChild(participantsSection);
+        activityCard.appendChild(participantsSection);  // Make sure participants show before the form
         activityCard.appendChild(addForm);
         activityCard.appendChild(cardMessage);
 
@@ -202,12 +191,12 @@ document.addEventListener("DOMContentLoaded", () => {
           if (emptyNote) emptyNote.remove();
 
           // append new participant to list
-          const participantsListEl = card.querySelector(".participants-list");
-          if (participantsListEl) {
-            const li = document.createElement("li");
+          const participantsList = card.querySelector('.participants-list');
+          if (participantsList) {
+            const li = document.createElement('li');
             const emailText = typeof email === "string" ? email : (email && (email.email || email.address || email.name)) || String(email);
             li.textContent = emailText;
-            participantsListEl.appendChild(li);
+            participantsList.appendChild(li);
           }
 
           // increment count and update availability
