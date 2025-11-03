@@ -155,18 +155,18 @@ footer {
   padding-left: 20px;
   margin-top: 8px;
   margin-bottom: 15px;
+  border: 1px dashed #c00; /* DEBUG: Add a red border to see the list */
 }
 
 .participants-list li {
   padding: 3px 0;
   color: #666;
   font-size: 0.9em;
-  display: list-item !important;
-  list-style-type: disc !important;
   margin-left: 5px;
 }
 
 .empty-note {
   font-style: italic;
   color: #888;
+  margin-left: 5px;
 }

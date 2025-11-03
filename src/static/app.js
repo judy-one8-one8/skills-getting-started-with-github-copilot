@@ -46,6 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const participantsListEl = document.createElement("ul");
         participantsListEl.className = "participants-list";
 
+        // Debug log
+        console.log("Participants for", name, ":", details.participants);
+
         if (details.participants && details.participants.length > 0) {
           details.participants.forEach(p => {
             const li = document.createElement("li");
@@ -60,6 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         participantsSection.appendChild(participantsListEl);
+
+        // DEBUG: Log the HTML of the participants list after rendering
+        console.log("Rendered participantsListEl for", name, participantsListEl.outerHTML);
 
         // Inline add-participant form
         const addForm = document.createElement("form");
