@@ -200,4 +200,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Disable add form if full
-            if
+            if (spotsLeft <= 0) {
+              const addForm = card.querySelector('.add-participant-form');
+              if (addForm) {
+                addForm.querySelector('input').disabled = true;
+                addForm.querySelector('button').disabled = true;
+              }
+            }
+          }
+        }
+
+        signupForm.reset();
+      } else {
+        messageDiv.textContent = result.detail || "An error occurred";
+        messageDiv.className = "error";
+      }
+
+      messageDiv.classList.remove("hidden");
+      setTimeout(() => {
+        messageDiv.classList.add("hidden");
+      }, 5000);
+    } catch (error) {
+      messageDiv.textContent = "Failed to sign up. Please try again.";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
+      console.error("Error signing up:", error);
+    }
+  });
+
+  fetchActivities();
+});
+
