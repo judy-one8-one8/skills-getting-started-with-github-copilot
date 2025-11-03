@@ -45,15 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const participantsListEl = document.createElement("ul");
         participantsListEl.className = "participants-list";
+        participantsListEl.style.display = "block"; // Force display
 
-        // Debug log
-        console.log("Participants for", name, ":", details.participants);
+        console.log("Adding participants:", details.participants); // Debug log
 
         if (details.participants && details.participants.length > 0) {
           details.participants.forEach(p => {
             const li = document.createElement("li");
             li.textContent = typeof p === "string" ? p : p.email || p.name || String(p);
+            li.style.display = "list-item"; // Force list item display
             participantsListEl.appendChild(li);
+            console.log("Added participant:", li.textContent); // Debug log
           });
         } else {
           const emptyLi = document.createElement("li");
@@ -63,9 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         participantsSection.appendChild(participantsListEl);
-
-        // DEBUG: Log the HTML of the participants list after rendering
-        console.log("Rendered participantsListEl for", name, participantsListEl.outerHTML);
+        console.log("Final participants HTML:", participantsSection.innerHTML); // Debug log
 
         // Inline add-participant form
         const addForm = document.createElement("form");

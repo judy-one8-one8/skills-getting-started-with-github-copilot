@@ -145,18 +145,20 @@ footer {
   margin-top: 15px;
   padding: 15px;
   border-top: 1px solid #ddd;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
 }
 
 .participants-list {
-  margin: 8px 0;
-  padding: 0 0 0 40px !important;  /* Force left padding for bullets */
-  list-style: disc outside !important;  /* Force bullets to show */
+  display: block !important;
+  list-style: disc !important;
+  margin: 10px 0;
+  padding-left: 25px !important;
 }
 
 .participants-list li {
-  display: list-item !important;  /* Force list item behavior */
-  margin: 4px 0;
+  display: list-item !important;
+  list-style: disc !important;
+  padding: 5px 0;
   color: #333;
 }
 
@@ -164,5 +166,4 @@ footer {
   list-style: none !important;
   font-style: italic;
   color: #666;
-  margin-left: -20px;  /* Pull back since no bullet */
 }
