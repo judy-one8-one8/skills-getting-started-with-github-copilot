@@ -10,24 +10,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message and reset select options
       activitiesList.innerHTML = "";
       activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
-      // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
-
-        // --- CHANGED: set data attributes to identify card and counts ---
         activityCard.dataset.activity = name;
         activityCard.dataset.max = String(details.max_participants);
         activityCard.dataset.count = String(details.participants.length);
 
-        // Compute spots left
         let spotsLeft = details.max_participants - details.participants.length;
 
-        // Title and description
         const titleEl = document.createElement("h4");
         titleEl.textContent = name;
         const descEl = document.createElement("p");
@@ -35,18 +29,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const scheduleEl = document.createElement("p");
         scheduleEl.innerHTML = `<strong>Schedule:</strong> ${details.schedule}`;
         const availabilityEl = document.createElement("p");
-        // --- CHANGED: give availability paragraph a class so it can be updated later ---
         availabilityEl.className = "availability";
         availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
 
-        // Participants section (always present)
+        // Participants section
         const participantsSection = document.createElement("div");
         participantsSection.className = "participants-section";
         participantsSection.innerHTML = '<p><strong>Current Participants:</strong></p>';
 
         const participantsListEl = document.createElement("ul");
         participantsListEl.className = "participants-list";
-        
+
         if (details.participants && details.participants.length > 0) {
           details.participants.forEach(p => {
             const li = document.createElement("li");
@@ -54,9 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
             participantsListEl.appendChild(li);
           });
         } else {
-          participantsListEl.innerHTML = '<li class="empty-note">No participants yet - Be the first to join!</li>';
+          const emptyLi = document.createElement("li");
+          emptyLi.className = "empty-note";
+          emptyLi.textContent = "No participants yet - Be the first to join!";
+          participantsListEl.appendChild(emptyLi);
         }
-        
+
         participantsSection.appendChild(participantsListEl);
 
         // Inline add-participant form
@@ -75,13 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
         cardMessage.className = "message hidden";
         cardMessage.style.marginTop = "8px";
 
-        // Disable form when no spots left
         if (spotsLeft <= 0) {
           addForm.querySelector("input[name='participantEmail']").disabled = true;
           addForm.querySelector("button").disabled = true;
         }
 
-        // Handle inline add-participant submit
+        // Inline add-participant submit
         addForm.addEventListener("submit", async (ev) => {
           ev.preventDefault();
           const input = addForm.querySelector("input[name='participantEmail']");
@@ -96,33 +91,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await res.json();
 
             if (res.ok) {
-              // Find and remove empty-note if it exists
-              const emptyNote = participantsListEl.querySelector('.empty-note');
-              if (emptyNote) {
-                emptyNote.remove();
-              }
+              // Remove only the empty-note li if present
+              const emptyNoteLi = participantsListEl.querySelector('.empty-note');
+              if (emptyNoteLi) emptyNoteLi.remove();
 
-              // Add new participant to the list
-              const li = document.createElement('li');
+              // Add new participant li
+              const li = document.createElement("li");
               li.textContent = email;
-              li.style.display = 'list-item'; // Force list item display
               participantsListEl.appendChild(li);
 
-              // Update counts and UI
               details.participants.push(email);
               spotsLeft = details.max_participants - details.participants.length;
               availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
-
-              // Update data attribute
               activityCard.dataset.count = String(details.participants.length);
 
-              // Disable form if full
               if (spotsLeft <= 0) {
                 input.disabled = true;
                 addForm.querySelector("button").disabled = true;
               }
 
-              // Show success message
               cardMessage.textContent = result.message || "Participant added";
               cardMessage.className = "message success";
               input.value = "";
@@ -140,18 +127,16 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // Assemble card in specific order
         activityCard.appendChild(titleEl);
         activityCard.appendChild(descEl);
         activityCard.appendChild(scheduleEl);
         activityCard.appendChild(availabilityEl);
-        activityCard.appendChild(participantsSection);  // Make sure participants show before the form
+        activityCard.appendChild(participantsSection);
         activityCard.appendChild(addForm);
         activityCard.appendChild(cardMessage);
 
         activitiesList.appendChild(activityCard);
 
-        // Add option to select dropdown
         const option = document.createElement("option");
         option.value = name;
         option.textContent = name;
@@ -163,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Handle form submission
+  // Global signup form
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -173,9 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(
         `/activities/${encodeURIComponent(activity)}/signup?email=${encodeURIComponent(email)}`,
-        {
-          method: "POST",
-        }
+        { method: "POST" }
       );
 
       const result = await response.json();
@@ -187,20 +170,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Find and update the corresponding activity card
         const card = Array.from(activitiesList.children)
           .find(c => c.dataset && c.dataset.activity === activity);
-        
+
         if (card) {
           const participantsList = card.querySelector('.participants-list');
           if (participantsList) {
-            // Remove empty-note if present
-            const emptyNote = participantsList.querySelector('.empty-note');
-            if (emptyNote) {
-              emptyNote.remove();
-            }
+            // Remove only the empty-note li if present
+            const emptyNoteLi = participantsList.querySelector('.empty-note');
+            if (emptyNoteLi) emptyNoteLi.remove();
 
-            // Add new participant
+            // Add new participant li
             const li = document.createElement('li');
             li.textContent = email;
-            li.style.display = 'list-item'; // Force list item display
             participantsList.appendChild(li);
 
             // Update counts
@@ -226,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // Reset the form
         signupForm.reset();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
@@ -234,8 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       messageDiv.classList.remove("hidden");
-
-      // Hide message after 5 seconds
       setTimeout(() => {
         messageDiv.classList.add("hidden");
       }, 5000);
@@ -247,6 +224,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Initialize app
   fetchActivities();
 });
