@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
 
+        // --- CHANGED: set data attributes to identify card and counts ---
+        activityCard.dataset.activity = name;
+        activityCard.dataset.max = String(details.max_participants);
+        activityCard.dataset.count = String(details.participants.length);
+
         // Compute spots left
         let spotsLeft = details.max_participants - details.participants.length;
 
@@ -30,6 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const scheduleEl = document.createElement("p");
         scheduleEl.innerHTML = `<strong>Schedule:</strong> ${details.schedule}`;
         const availabilityEl = document.createElement("p");
+        // --- CHANGED: give availability paragraph a class so it can be updated later ---
+        availabilityEl.className = "availability";
         availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
 
         // Participants section (always present)
@@ -176,6 +183,42 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+
+        // --- CHANGED: update the activity card in-place so participants show immediately ---
+        // find the card with matching data-activity (avoid CSS selector pitfalls)
+        const cards = Array.from(activitiesList.children);
+        const card = cards.find((c) => c.dataset && c.dataset.activity === activity);
+        if (card) {
+          // remove empty-note if present
+          const emptyNote = card.querySelector(".empty-note");
+          if (emptyNote) emptyNote.remove();
+
+          // append new participant to list
+          const participantsListEl = card.querySelector(".participants-list");
+          if (participantsListEl) {
+            const li = document.createElement("li");
+            li.textContent = email;
+            participantsListEl.appendChild(li);
+          }
+
+          // increment count and update availability
+          const max = parseInt(card.dataset.max || "0", 10);
+          const count = parseInt(card.dataset.count || "0", 10) + 1;
+          card.dataset.count = String(count);
+          const spotsLeft = Math.max(0, max - count);
+          const availabilityEl = card.querySelector(".availability");
+          if (availabilityEl) {
+            availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
+          }
+
+          // disable inline add form if full
+          if (spotsLeft <= 0) {
+            const addFormInput = card.querySelector("input[name='participantEmail']");
+            const addFormButton = card.querySelector(".add-participant-form button");
+            if (addFormInput) addFormInput.disabled = true;
+            if (addFormButton) addFormButton.disabled = true;
+          }
+        }
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
