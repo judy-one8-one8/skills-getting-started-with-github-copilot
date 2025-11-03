@@ -145,25 +145,22 @@ footer {
 
 .participants-section {
   margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #ddd;
-  margin-bottom: 15px;
-  background-color: #fff;
   padding: 15px;
+  border-top: 1px solid #ddd;
+  background-color: #ffffff;
   border-radius: 4px;
 }
 
 .participants-list {
-  list-style: disc;
-  padding-left: 25px;
+  display: block;
+  list-style-type: disc;
   margin: 10px 0;
-  background-color: #fafafa;
-  border-radius: 4px;
-  padding: 10px 10px 10px 35px;
+  padding-left: 30px;
 }
 
 .participants-list li {
-  padding: 4px 0;
+  display: list-item !important;
+  padding: 3px 0;
   color: #444;
   font-size: 0.95em;
 }
@@ -171,5 +168,6 @@ footer {
 .empty-note {
   font-style: italic;
   color: #888;
-  list-style: none !important;
+  list-style-type: none !important;
+  padding-left: 0;
 }
