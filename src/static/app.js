@@ -10,34 +10,136 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear loading message and reset select options
       activitiesList.innerHTML = "";
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
 
-        const spotsLeft = details.max_participants - details.participants.length;
+        // Compute spots left
+        let spotsLeft = details.max_participants - details.participants.length;
 
-        // Create participants list HTML
-        const participantsList = details.participants.length > 0
-          ? `
-            <div class="participants-section">
-              <p><strong>Current Participants:</strong></p>
-              <ul class="participants-list">
-                ${details.participants.map(email => `<li>${email}</li>`).join('')}
-              </ul>
-            </div>`
-          : '<p><em>No participants yet - Be the first to join!</em></p>';
+        // Title and description
+        const titleEl = document.createElement("h4");
+        titleEl.textContent = name;
+        const descEl = document.createElement("p");
+        descEl.textContent = details.description;
+        const scheduleEl = document.createElement("p");
+        scheduleEl.innerHTML = `<strong>Schedule:</strong> ${details.schedule}`;
+        const availabilityEl = document.createElement("p");
+        availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          ${participantsList}
+        // Participants section (always present)
+        const participantsSection = document.createElement("div");
+        participantsSection.className = "participants-section";
+
+        const participantsTitle = document.createElement("p");
+        participantsTitle.innerHTML = "<strong>Current Participants:</strong>";
+        participantsSection.appendChild(participantsTitle);
+
+        const participantsListEl = document.createElement("ul");
+        participantsListEl.className = "participants-list";
+
+        if (details.participants.length > 0) {
+          details.participants.forEach((email) => {
+            const li = document.createElement("li");
+            li.textContent = email;
+            participantsListEl.appendChild(li);
+          });
+        } else {
+          const emptyNote = document.createElement("p");
+          emptyNote.className = "empty-note";
+          emptyNote.style.fontStyle = "italic";
+          emptyNote.textContent = "No participants yet - Be the first to join!";
+          participantsSection.appendChild(emptyNote);
+        }
+
+        participantsSection.appendChild(participantsListEl);
+
+        // Inline add-participant form
+        const addForm = document.createElement("form");
+        addForm.className = "add-participant-form";
+        addForm.style.marginTop = "10px";
+        addForm.innerHTML = `
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="email" name="participantEmail" placeholder="participant email" required
+                   style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:14px;" />
+            <button type="submit">Add</button>
+          </div>
         `;
+
+        const cardMessage = document.createElement("div");
+        cardMessage.className = "message hidden";
+        cardMessage.style.marginTop = "8px";
+
+        // Disable form when no spots left
+        if (spotsLeft <= 0) {
+          addForm.querySelector("input[name='participantEmail']").disabled = true;
+          addForm.querySelector("button").disabled = true;
+        }
+
+        // Handle inline add-participant submit
+        addForm.addEventListener("submit", async (ev) => {
+          ev.preventDefault();
+          const input = addForm.querySelector("input[name='participantEmail']");
+          const email = input.value.trim();
+          if (!email) return;
+
+          try {
+            const res = await fetch(
+              `/activities/${encodeURIComponent(name)}/signup?email=${encodeURIComponent(email)}`,
+              { method: "POST" }
+            );
+            const result = await res.json();
+
+            if (res.ok) {
+              // Remove empty-note if present
+              const emptyNote = participantsSection.querySelector(".empty-note");
+              if (emptyNote) emptyNote.remove();
+
+              // Append new participant to list and update internal count
+              const li = document.createElement("li");
+              li.textContent = email;
+              participantsListEl.appendChild(li);
+              details.participants.push(email);
+              spotsLeft = details.max_participants - details.participants.length;
+              availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
+
+              // Disable add form if full
+              if (spotsLeft <= 0) {
+                input.disabled = true;
+                addForm.querySelector("button").disabled = true;
+              }
+
+              cardMessage.textContent = result.message || "Participant added";
+              cardMessage.className = "message success";
+              // clear input
+              input.value = "";
+            } else {
+              cardMessage.textContent = result.detail || "Failed to add participant";
+              cardMessage.className = "message error";
+            }
+          } catch (err) {
+            console.error("Inline signup error:", err);
+            cardMessage.textContent = "Failed to add participant. Try again.";
+            cardMessage.className = "message error";
+          } finally {
+            cardMessage.classList.remove("hidden");
+            setTimeout(() => cardMessage.classList.add("hidden"), 4000);
+          }
+        });
+
+        // Assemble card
+        activityCard.appendChild(titleEl);
+        activityCard.appendChild(descEl);
+        activityCard.appendChild(scheduleEl);
+        activityCard.appendChild(availabilityEl);
+        activityCard.appendChild(participantsSection);
+        activityCard.appendChild(addForm);
+        activityCard.appendChild(cardMessage);
 
         activitiesList.appendChild(activityCard);
 
