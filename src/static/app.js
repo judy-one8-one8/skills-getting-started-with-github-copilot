@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
+  // Utility: Remove all .empty-note elements from a list
+  function removeEmptyNotes(listEl) {
+    if (!listEl) return;
+    Array.from(listEl.querySelectorAll('.empty-note')).forEach(node => node.remove());
+  }
+
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
@@ -91,9 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await res.json();
 
             if (res.ok) {
-              // Remove only the empty-note li if present
-              const emptyNoteLi = participantsListEl.querySelector('.empty-note');
-              if (emptyNoteLi) emptyNoteLi.remove();
+              // Remove all empty-note lis before adding new participant
+              removeEmptyNotes(participantsListEl);
 
               // Add new participant li
               const li = document.createElement("li");
@@ -174,9 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (card) {
           const participantsList = card.querySelector('.participants-list');
           if (participantsList) {
-            // Remove only the empty-note li if present
-            const emptyNoteLi = participantsList.querySelector('.empty-note');
-            if (emptyNoteLi) emptyNoteLi.remove();
+            // Remove all empty-note lis before adding new participant
+            removeEmptyNotes(participantsList);
 
             // Add new participant li
             const li = document.createElement('li');
@@ -196,33 +200,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Disable add form if full
-            if (spotsLeft <= 0) {
-              const addForm = card.querySelector('.add-participant-form');
-              if (addForm) {
-                addForm.querySelector('input').disabled = true;
-                addForm.querySelector('button').disabled = true;
-              }
-            }
-          }
-        }
-
-        signupForm.reset();
-      } else {
-        messageDiv.textContent = result.detail || "An error occurred";
-        messageDiv.className = "error";
-      }
-
-      messageDiv.classList.remove("hidden");
-      setTimeout(() => {
-        messageDiv.classList.add("hidden");
-      }, 5000);
-    } catch (error) {
-      messageDiv.textContent = "Failed to sign up. Please try again.";
-      messageDiv.className = "error";
-      messageDiv.classList.remove("hidden");
-      console.error("Error signing up:", error);
-    }
-  });
-
-  fetchActivities();
-});
+            if
