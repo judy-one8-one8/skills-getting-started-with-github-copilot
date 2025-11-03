@@ -147,20 +147,23 @@ footer {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px dashed #ddd;
-  margin-bottom: 15px;  /* Add space before the add form */
+  margin-bottom: 15px;
 }
 
 .participants-list {
-  list-style: disc inside;  /* Force bullet points to show */
+  list-style-type: disc !important;
   padding-left: 20px;
   margin-top: 8px;
+  margin-bottom: 15px;
 }
 
 .participants-list li {
   padding: 3px 0;
   color: #666;
   font-size: 0.9em;
-  display: list-item !important;  /* Force list item display */
+  display: list-item !important;
+  list-style-type: disc !important;
+  margin-left: 5px;
 }
 
 .empty-note {

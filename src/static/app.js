@@ -96,31 +96,35 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await res.json();
 
             if (res.ok) {
-              // Remove empty-note if present
+              // Find and remove empty-note if it exists
               const emptyNote = participantsListEl.querySelector('.empty-note');
               if (emptyNote) {
-                participantsListEl.innerHTML = ''; // Clear "no participants" message
+                emptyNote.remove();
               }
 
-              // Append new participant to list and update internal count
-              const li = document.createElement("li");
-              // CHANGED: normalize email in case server uses object structure
-              const emailText = typeof email === "string" ? email : (email && (email.email || email.address || email.name)) || String(email);
-              li.textContent = emailText;
+              // Add new participant to the list
+              const li = document.createElement('li');
+              li.textContent = email;
+              li.style.display = 'list-item'; // Force list item display
               participantsListEl.appendChild(li);
+
+              // Update counts and UI
               details.participants.push(email);
               spotsLeft = details.max_participants - details.participants.length;
               availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
 
-              // Disable add form if full
+              // Update data attribute
+              activityCard.dataset.count = String(details.participants.length);
+
+              // Disable form if full
               if (spotsLeft <= 0) {
                 input.disabled = true;
                 addForm.querySelector("button").disabled = true;
               }
 
+              // Show success message
               cardMessage.textContent = result.message || "Participant added";
               cardMessage.className = "message success";
-              // clear input
               input.value = "";
             } else {
               cardMessage.textContent = result.detail || "Failed to add participant";
@@ -178,45 +182,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         messageDiv.textContent = result.message;
-        messageDiv.className = "success";
-        signupForm.reset();
+        messageDiv.className = "message success";
 
-        // --- CHANGED: update the activity card in-place so participants show immediately ---
-        // find the card with matching data-activity (avoid CSS selector pitfalls)
-        const cards = Array.from(activitiesList.children);
-        const card = cards.find((c) => c.dataset && c.dataset.activity === activity);
+        // Find and update the corresponding activity card
+        const card = Array.from(activitiesList.children)
+          .find(c => c.dataset && c.dataset.activity === activity);
+        
         if (card) {
-          // remove empty-note if present
-          const emptyNote = card.querySelector(".empty-note");
-          if (emptyNote) emptyNote.remove();
-
-          // append new participant to list
           const participantsList = card.querySelector('.participants-list');
           if (participantsList) {
+            // Remove empty-note if present
+            const emptyNote = participantsList.querySelector('.empty-note');
+            if (emptyNote) {
+              emptyNote.remove();
+            }
+
+            // Add new participant
             const li = document.createElement('li');
-            const emailText = typeof email === "string" ? email : (email && (email.email || email.address || email.name)) || String(email);
-            li.textContent = emailText;
+            li.textContent = email;
+            li.style.display = 'list-item'; // Force list item display
             participantsList.appendChild(li);
-          }
 
-          // increment count and update availability
-          const max = parseInt(card.dataset.max || "0", 10);
-          const count = parseInt(card.dataset.count || "0", 10) + 1;
-          card.dataset.count = String(count);
-          const spotsLeft = Math.max(0, max - count);
-          const availabilityEl = card.querySelector(".availability");
-          if (availabilityEl) {
-            availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
-          }
+            // Update counts
+            const count = parseInt(card.dataset.count || '0', 10) + 1;
+            card.dataset.count = String(count);
+            const max = parseInt(card.dataset.max || '0', 10);
+            const spotsLeft = Math.max(0, max - count);
 
-          // disable inline add form if full
-          if (spotsLeft <= 0) {
-            const addFormInput = card.querySelector("input[name='participantEmail']");
-            const addFormButton = card.querySelector(".add-participant-form button");
-            if (addFormInput) addFormInput.disabled = true;
-            if (addFormButton) addFormButton.disabled = true;
+            // Update availability display
+            const availabilityEl = card.querySelector('.availability');
+            if (availabilityEl) {
+              availabilityEl.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
+            }
+
+            // Disable add form if full
+            if (spotsLeft <= 0) {
+              const addForm = card.querySelector('.add-participant-form');
+              if (addForm) {
+                addForm.querySelector('input').disabled = true;
+                addForm.querySelector('button').disabled = true;
+              }
+            }
           }
         }
+
+        // Reset the form
+        signupForm.reset();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
