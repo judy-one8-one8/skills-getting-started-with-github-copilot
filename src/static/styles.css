@@ -146,27 +146,30 @@ footer {
 .participants-section {
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px dashed #ddd;
+  border-top: 1px solid #ddd;
   margin-bottom: 15px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 4px;
 }
 
 .participants-list {
-  list-style-type: disc !important;
-  padding-left: 20px;
-  margin-top: 8px;
-  margin-bottom: 15px;
-  border: 1px dashed #c00; /* DEBUG: Add a red border to see the list */
+  list-style: disc;
+  padding-left: 25px;
+  margin: 10px 0;
+  background-color: #fafafa;
+  border-radius: 4px;
+  padding: 10px 10px 10px 35px;
 }
 
 .participants-list li {
-  padding: 3px 0;
-  color: #666;
-  font-size: 0.9em;
-  margin-left: 5px;
+  padding: 4px 0;
+  color: #444;
+  font-size: 0.95em;
 }
 
 .empty-note {
   font-style: italic;
   color: #888;
-  margin-left: 5px;
+  list-style: none !important;
 }
